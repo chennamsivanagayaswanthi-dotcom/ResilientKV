@@ -14,3 +14,6 @@ data/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Native benchmark binaries
+benchmarks/rocksdb/rocksdb_benchmark

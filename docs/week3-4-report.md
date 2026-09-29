@@ -263,3 +263,117 @@ stress testing, and performance benchmarking.
 The next major task is to perform a controlled performance
 comparison against RocksDB before proceeding to the next
 project milestone.
+
+---
+
+## 14. Initial RocksDB Benchmark
+
+RocksDB version 8.9.1 was installed and benchmarked using its
+native C++ API.
+
+Environment:
+
+- CPU: 13th Gen Intel(R) Core(TM) i5-1340P
+- Architecture: amd64
+- Compiler: g++ 13.3.0
+- RocksDB: 8.9.1
+- Dataset: 1,000 keys
+- Operations: 10,000 per benchmark
+
+Initial results:
+
+| Operation | RocksDB |
+|-----------|--------:|
+| PUT | 5,511.88 ns/op |
+| GET | 1,618.05 ns/op |
+| DELETE | 7,790.22 ns/op |
+| Mixed | 5,449.83 ns/op |
+
+### Methodology Limitation
+
+The initial RocksDB benchmark uses RocksDB's default
+WriteOptions, whereas ResilientKV currently performs
+synchronous WAL file synchronization for every write.
+
+Consequently, these measurements should be treated as
+baseline observations rather than a direct apples-to-apples
+comparison.
+
+A controlled comparison with explicitly matched durability
+settings is required before making performance conclusions.
+
+---
+
+## 15. Benchmark Comparison Plan
+
+The final performance evaluation will control the following
+variables:
+
+- Same CPU and operating environment
+- Same number of keys
+- Same operation count
+- Same key/value sizes
+- Same workload distribution
+- Comparable durability configuration
+- Same benchmark warm-up methodology
+- Multiple benchmark repetitions
+
+The final report will present the raw measurements and explain
+the configuration used for each system.
+
+---
+
+## 14. Initial RocksDB Benchmark
+
+RocksDB version 8.9.1 was installed and benchmarked using its
+native C++ API.
+
+Environment:
+
+- CPU: 13th Gen Intel(R) Core(TM) i5-1340P
+- Architecture: amd64
+- Compiler: g++ 13.3.0
+- RocksDB: 8.9.1
+- Dataset: 1,000 keys
+- Operations: 10,000 per benchmark
+
+Initial results:
+
+| Operation | RocksDB |
+|-----------|--------:|
+| PUT | 5,511.88 ns/op |
+| GET | 1,618.05 ns/op |
+| DELETE | 7,790.22 ns/op |
+| Mixed | 5,449.83 ns/op |
+
+### Methodology Limitation
+
+The initial RocksDB benchmark uses RocksDB's default
+WriteOptions, whereas ResilientKV currently performs
+synchronous WAL file synchronization for every write.
+
+Consequently, these measurements should be treated as
+baseline observations rather than a direct apples-to-apples
+comparison.
+
+A controlled comparison with explicitly matched durability
+settings is required before making performance conclusions.
+
+---
+
+## 15. Benchmark Comparison Plan
+
+The final performance evaluation will control the following
+variables:
+
+- Same CPU and operating environment
+- Same number of keys
+- Same operation count
+- Same key/value sizes
+- Same workload distribution
+- Comparable durability configuration
+- Same benchmark warm-up methodology
+- Multiple benchmark repetitions
+
+The final report will present the raw measurements and explain
+the configuration used for each system.
