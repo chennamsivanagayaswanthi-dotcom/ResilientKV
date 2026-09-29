@@ -44,3 +44,69 @@ func TestSSTableWriteAndRead(t *testing.T) {
 		t.Fatalf("expected third key to be name, got %s", result[2].Key)
 	}
 }
+
+func TestSSTableGet(t *testing.T) {
+	file := "test_get.sst"
+
+	defer os.Remove(file)
+
+	entries := []Entry{
+		{Key: "name", Value: "Yaswanthi"},
+		{Key: "city", Value: "Guntur"},
+		{Key: "course", Value: "MTech"},
+	}
+
+	err := Write(file, entries)
+
+	if err != nil {
+		t.Fatalf("failed to write SSTable: %v", err)
+	}
+
+	value, exists, tombstone, err := Get(file, "city")
+
+	if err != nil {
+		t.Fatalf("failed to get key: %v", err)
+	}
+
+	if tombstone {
+		t.Fatal("expected key to not be a tombstone")
+	}
+
+	if tombstone {
+		t.Fatal("expected key to not be a tombstone")
+	}
+
+	if !exists {
+		t.Fatal("expected city to exist")
+	}
+
+	if value != "Guntur" {
+		t.Fatalf("expected Guntur, got %s", value)
+	}
+}
+
+func TestSSTableGetMissingKey(t *testing.T) {
+	file := "test_missing.sst"
+
+	defer os.Remove(file)
+
+	entries := []Entry{
+		{Key: "name", Value: "Yaswanthi"},
+	}
+
+	err := Write(file, entries)
+
+	if err != nil {
+		t.Fatalf("failed to write SSTable: %v", err)
+	}
+
+	_, exists, _, err := Get(file, "age")
+
+	if err != nil {
+		t.Fatalf("failed to search SSTable: %v", err)
+	}
+
+	if exists {
+		t.Fatal("expected age not to exist")
+	}
+}

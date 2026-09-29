@@ -42,6 +42,10 @@ func TestMemTableDelete(t *testing.T) {
 	if exists {
 		t.Fatal("expected key to be deleted")
 	}
+
+	if !m.IsDeleted("name") {
+		t.Fatal("expected tombstone to exist")
+	}
 }
 
 func TestMemTableSize(t *testing.T) {
@@ -53,26 +57,5 @@ func TestMemTableSize(t *testing.T) {
 
 	if m.Size() != 3 {
 		t.Fatalf("expected size 3, got %d", m.Size())
-	}
-}
-func BenchmarkMemTablePut(b *testing.B) {
-	m := New()
-
-	for i := 0; i < b.N; i++ {
-		key := "key"
-		value := "value"
-
-		m.Put(key, value)
-	}
-}
-
-func BenchmarkMemTableGet(b *testing.B) {
-	m := New()
-	m.Put("key", "value")
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		m.Get("key")
 	}
 }
