@@ -2,6 +2,12 @@ package memtable
 
 import "sync"
 
+// Entry represents one key-value pair.
+type Entry struct {
+	Key   string
+	Value string
+}
+
 // MemTable stores key-value pairs in memory.
 type MemTable struct {
 	mu   sync.RWMutex
@@ -46,4 +52,21 @@ func (m *MemTable) Size() int {
 	defer m.mu.RUnlock()
 
 	return len(m.data)
+}
+
+// AllEntries returns all key-value pairs.
+func (m *MemTable) AllEntries() []Entry {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	entries := make([]Entry, 0, len(m.data))
+
+	for key, value := range m.data {
+		entries = append(entries, Entry{
+			Key:   key,
+			Value: value,
+		})
+	}
+
+	return entries
 }
