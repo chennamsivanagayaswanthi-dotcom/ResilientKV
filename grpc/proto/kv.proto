@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package kv;
+
+option go_package = "resilientkv/grpc/proto;proto";
+
+service KeyValueService {
+    rpc Put(PutRequest) returns (PutResponse);
+    rpc Get(GetRequest) returns (GetResponse);
+    rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+message PutRequest {
+    string key = 1;
+    string value = 2;
+    string request_id = 3;
+}
+
+message PutResponse {
+    bool success = 1;
+}
+
+message GetRequest {
+    string key = 1;
+    string request_id = 2;
+}
+
+message GetResponse {
+    string value = 1;
+    bool found = 2;
+}
+
+message DeleteRequest {
+    string key = 1;
+    string request_id = 2;
+}
+
+message DeleteResponse {
+    bool success = 1;
+}
