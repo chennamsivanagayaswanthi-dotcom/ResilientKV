@@ -1,94 +1,62 @@
-# Week 7–8 — Distributed Primitives
+# ResilientKV — Week 7–8 Report
+## Distributed Communication and Testing
 
-## 1. Objective
+### 1. Objective
+Implement a gRPC communication layer connecting clients to the
+ResilientKV storage engine, and test basic distributed-service behavior.
 
-The objective of Weeks 7–8 was to implement distributed communication
-primitives for ResilientKV using gRPC.
+### 2. Technology
+- Go
+- gRPC
+- Protocol Buffers
+- Existing ResilientKV storage engine
 
-## 2. Protocol Buffers
+### 3. Implemented Components
+- Protocol Buffers API for PUT, GET, and DELETE
+- gRPC server
+- gRPC client
+- Storage-engine integration
+- Request IDs for duplicate-request detection
+- Basic deterministic key-to-node routing component
 
-A Protocol Buffers API was created for the key-value service.
+### 4. Functional Testing
+The gRPC client successfully performed PUT, GET, and DELETE operations.
+A GET after DELETE confirmed that the deleted key was not found.
 
-Operations:
+### 5. Duplicate-Request Test
+The client sent the same PUT request ID twice.
+Both calls returned success, and a subsequent GET found the expected value.
 
-- PUT
-- GET
-- DELETE
+Limitation: this test demonstrates duplicate-request handling at the
+service interface. It does not yet prove durable deduplication across
+server restarts or replicated exactly-once execution.
 
-Request IDs were added to support duplicate-request detection.
+### 6. Routing Test
+The routing unit test passed and mapped the key "product" to a node
+address. This validates the basic routing function only. Routing
+requests across live nodes and selecting a Raft leader remain future work.
 
-## 3. gRPC Server
+### 7. Server-Unavailability Test
+When the gRPC server was stopped, the client received an RPC error
+with status Unavailable and connection refused. This confirms that
+the client reports this connection failure. Automatic failover is not
+implemented by this test.
 
-A gRPC server was implemented on port 50051.
+### 8. Automated Test Results
+Commands executed:
 
-The server connects incoming requests to the ResilientKV storage engine.
+    go test ./...
+    go test -race ./...
 
-Architecture:
+All listed Go packages passed. No race-detector warnings were reported.
 
-Client
-  |
-  v
-gRPC Server
-  |
-  v
-Storage Engine
-  |
-  +-- MemTable
-  +-- WAL
-  +-- SSTable
+### 9. Current Limitations
+- Raft consensus and leader election are not implemented yet.
+- The routing component is not yet integrated with live multi-node RPC.
+- Request deduplication is in memory and is not durable across restarts.
+- Kubernetes deployment and production observability are future milestones.
 
-## 4. gRPC Client
-
-A Go client was implemented to communicate with the server.
-
-The client successfully performed:
-
-- PUT
-- GET
-- DELETE
-
-## 5. At-Least-Once Semantics
-
-Request IDs were introduced to identify duplicate requests.
-
-When the same request ID is received again, the server recognizes
-the request as already processed.
-
-## 6. Client Routing
-
-A basic routing component was implemented.
-
-The router selects a server node based on the key.
-
-Example:
-
-key -> hash -> node selection
-
-## 7. Testing
-
-The following tests were performed:
-
-go test ./...
-
-go test -race ./...
-
-The project passed the existing unit tests and race detector tests.
-
-## 8. Result
-
-Weeks 7–8 established the distributed communication layer required
-for the next milestone.
-
-The system can now communicate through gRPC and access the storage
-engine through the service interface.
-
-## 9. Next Milestone
-
-Weeks 9–10 will implement Raft consensus:
-
-- Leader election
-- Terms
-- Voting
-- Log replication
-- Commit index
-- Safety tests
+### 10. Conclusion
+Weeks 7–8 established and tested the basic gRPC communication layer.
+The next milestone is implementing Raft consensus, including elections,
+log replication, commit handling, and safety tests.
