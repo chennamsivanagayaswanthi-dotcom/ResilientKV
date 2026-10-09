@@ -84,6 +84,7 @@ func (x *PutRequest) GetRequestId() string {
 type PutResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -125,10 +126,16 @@ func (x *PutResponse) GetSuccess() bool {
 	return false
 }
 
+func (x *PutResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 type GetRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -170,17 +177,11 @@ func (x *GetRequest) GetKey() string {
 	return ""
 }
 
-func (x *GetRequest) GetRequestId() string {
-	if x != nil {
-		return x.RequestId
-	}
-	return ""
-}
-
 type GetResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
 	Found         bool                   `protobuf:"varint,2,opt,name=found,proto3" json:"found,omitempty"`
+	Error         string                 `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -227,6 +228,13 @@ func (x *GetResponse) GetFound() bool {
 		return x.Found
 	}
 	return false
+}
+
+func (x *GetResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
 }
 
 type DeleteRequest struct {
@@ -284,6 +292,7 @@ func (x *DeleteRequest) GetRequestId() string {
 type DeleteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -323,6 +332,13 @@ func (x *DeleteResponse) GetSuccess() bool {
 		return x.Success
 	}
 	return false
+}
+
+func (x *DeleteResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
 }
 
 type RequestVoteRequest struct {
@@ -557,33 +573,222 @@ func (x *TriggerElectionResponse) GetState() string {
 	return ""
 }
 
+type ReplicatedLogEntry struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Term          int32                  `protobuf:"varint,1,opt,name=term,proto3" json:"term,omitempty"`
+	Command       string                 `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplicatedLogEntry) Reset() {
+	*x = ReplicatedLogEntry{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplicatedLogEntry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplicatedLogEntry) ProtoMessage() {}
+
+func (x *ReplicatedLogEntry) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplicatedLogEntry.ProtoReflect.Descriptor instead.
+func (*ReplicatedLogEntry) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ReplicatedLogEntry) GetTerm() int32 {
+	if x != nil {
+		return x.Term
+	}
+	return 0
+}
+
+func (x *ReplicatedLogEntry) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
+type AppendEntriesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Term          int32                  `protobuf:"varint,1,opt,name=term,proto3" json:"term,omitempty"`
+	LeaderId      string                 `protobuf:"bytes,2,opt,name=leader_id,json=leaderId,proto3" json:"leader_id,omitempty"`
+	PrevLogIndex  int32                  `protobuf:"varint,3,opt,name=prev_log_index,json=prevLogIndex,proto3" json:"prev_log_index,omitempty"`
+	PrevLogTerm   int32                  `protobuf:"varint,4,opt,name=prev_log_term,json=prevLogTerm,proto3" json:"prev_log_term,omitempty"`
+	Entries       []*ReplicatedLogEntry  `protobuf:"bytes,5,rep,name=entries,proto3" json:"entries,omitempty"`
+	LeaderCommit  int32                  `protobuf:"varint,6,opt,name=leader_commit,json=leaderCommit,proto3" json:"leader_commit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AppendEntriesRequest) Reset() {
+	*x = AppendEntriesRequest{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AppendEntriesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppendEntriesRequest) ProtoMessage() {}
+
+func (x *AppendEntriesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppendEntriesRequest.ProtoReflect.Descriptor instead.
+func (*AppendEntriesRequest) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AppendEntriesRequest) GetTerm() int32 {
+	if x != nil {
+		return x.Term
+	}
+	return 0
+}
+
+func (x *AppendEntriesRequest) GetLeaderId() string {
+	if x != nil {
+		return x.LeaderId
+	}
+	return ""
+}
+
+func (x *AppendEntriesRequest) GetPrevLogIndex() int32 {
+	if x != nil {
+		return x.PrevLogIndex
+	}
+	return 0
+}
+
+func (x *AppendEntriesRequest) GetPrevLogTerm() int32 {
+	if x != nil {
+		return x.PrevLogTerm
+	}
+	return 0
+}
+
+func (x *AppendEntriesRequest) GetEntries() []*ReplicatedLogEntry {
+	if x != nil {
+		return x.Entries
+	}
+	return nil
+}
+
+func (x *AppendEntriesRequest) GetLeaderCommit() int32 {
+	if x != nil {
+		return x.LeaderCommit
+	}
+	return 0
+}
+
+type AppendEntriesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Term          int32                  `protobuf:"varint,1,opt,name=term,proto3" json:"term,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AppendEntriesResponse) Reset() {
+	*x = AppendEntriesResponse{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AppendEntriesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppendEntriesResponse) ProtoMessage() {}
+
+func (x *AppendEntriesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppendEntriesResponse.ProtoReflect.Descriptor instead.
+func (*AppendEntriesResponse) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *AppendEntriesResponse) GetTerm() int32 {
+	if x != nil {
+		return x.Term
+	}
+	return 0
+}
+
+func (x *AppendEntriesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_grpc_proto_kv_proto protoreflect.FileDescriptor
 
 const file_grpc_proto_kv_proto_rawDesc = "" +
 	"\n" +
-	"\x13grpc/proto/kv.proto\x12\x02kv\"S\n" +
+	"\x13grpc/proto/kv.proto\x12\x05proto\"S\n" +
 	"\n" +
 	"PutRequest\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x03 \x01(\tR\trequestId\"'\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\"=\n" +
 	"\vPutResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"=\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"\x1e\n" +
 	"\n" +
 	"GetRequest\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"9\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\"O\n" +
 	"\vGetResponse\x12\x14\n" +
 	"\x05value\x18\x01 \x01(\tR\x05value\x12\x14\n" +
-	"\x05found\x18\x02 \x01(\bR\x05found\"@\n" +
+	"\x05found\x18\x02 \x01(\bR\x05found\x12\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\"@\n" +
 	"\rDeleteRequest\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"*\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"@\n" +
 	"\x0eDeleteResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x95\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"\x95\x01\n" +
 	"\x12RequestVoteRequest\x12!\n" +
 	"\fcandidate_id\x18\x01 \x01(\tR\vcandidateId\x12\x12\n" +
 	"\x04term\x18\x02 \x01(\x05R\x04term\x12$\n" +
@@ -598,13 +803,27 @@ const file_grpc_proto_kv_proto_rawDesc = "" +
 	"\x17TriggerElectionResponse\x12\x18\n" +
 	"\aelected\x18\x01 \x01(\bR\aelected\x12\x12\n" +
 	"\x04term\x18\x02 \x01(\x05R\x04term\x12\x14\n" +
-	"\x05state\x18\x03 \x01(\tR\x05state2\x9e\x02\n" +
-	"\x0fKeyValueService\x12&\n" +
-	"\x03Put\x12\x0e.kv.PutRequest\x1a\x0f.kv.PutResponse\x12&\n" +
-	"\x03Get\x12\x0e.kv.GetRequest\x1a\x0f.kv.GetResponse\x12/\n" +
-	"\x06Delete\x12\x11.kv.DeleteRequest\x1a\x12.kv.DeleteResponse\x12>\n" +
-	"\vRequestVote\x12\x16.kv.RequestVoteRequest\x1a\x17.kv.RequestVoteResponse\x12J\n" +
-	"\x0fTriggerElection\x12\x1a.kv.TriggerElectionRequest\x1a\x1b.kv.TriggerElectionResponseB\x1eZ\x1cresilientkv/grpc/proto;protob\x06proto3"
+	"\x05state\x18\x03 \x01(\tR\x05state\"B\n" +
+	"\x12ReplicatedLogEntry\x12\x12\n" +
+	"\x04term\x18\x01 \x01(\x05R\x04term\x12\x18\n" +
+	"\acommand\x18\x02 \x01(\tR\acommand\"\xeb\x01\n" +
+	"\x14AppendEntriesRequest\x12\x12\n" +
+	"\x04term\x18\x01 \x01(\x05R\x04term\x12\x1b\n" +
+	"\tleader_id\x18\x02 \x01(\tR\bleaderId\x12$\n" +
+	"\x0eprev_log_index\x18\x03 \x01(\x05R\fprevLogIndex\x12\"\n" +
+	"\rprev_log_term\x18\x04 \x01(\x05R\vprevLogTerm\x123\n" +
+	"\aentries\x18\x05 \x03(\v2\x19.proto.ReplicatedLogEntryR\aentries\x12#\n" +
+	"\rleader_commit\x18\x06 \x01(\x05R\fleaderCommit\"E\n" +
+	"\x15AppendEntriesResponse\x12\x12\n" +
+	"\x04term\x18\x01 \x01(\x05R\x04term\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess2\x88\x03\n" +
+	"\x0fKeyValueService\x12,\n" +
+	"\x03Put\x12\x11.proto.PutRequest\x1a\x12.proto.PutResponse\x12,\n" +
+	"\x03Get\x12\x11.proto.GetRequest\x1a\x12.proto.GetResponse\x125\n" +
+	"\x06Delete\x12\x14.proto.DeleteRequest\x1a\x15.proto.DeleteResponse\x12D\n" +
+	"\vRequestVote\x12\x19.proto.RequestVoteRequest\x1a\x1a.proto.RequestVoteResponse\x12P\n" +
+	"\x0fTriggerElection\x12\x1d.proto.TriggerElectionRequest\x1a\x1e.proto.TriggerElectionResponse\x12J\n" +
+	"\rAppendEntries\x12\x1b.proto.AppendEntriesRequest\x1a\x1c.proto.AppendEntriesResponseB\x18Z\x16resilientkv/grpc/protob\x06proto3"
 
 var (
 	file_grpc_proto_kv_proto_rawDescOnce sync.Once
@@ -618,35 +837,41 @@ func file_grpc_proto_kv_proto_rawDescGZIP() []byte {
 	return file_grpc_proto_kv_proto_rawDescData
 }
 
-var file_grpc_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_grpc_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_grpc_proto_kv_proto_goTypes = []any{
-	(*PutRequest)(nil),              // 0: kv.PutRequest
-	(*PutResponse)(nil),             // 1: kv.PutResponse
-	(*GetRequest)(nil),              // 2: kv.GetRequest
-	(*GetResponse)(nil),             // 3: kv.GetResponse
-	(*DeleteRequest)(nil),           // 4: kv.DeleteRequest
-	(*DeleteResponse)(nil),          // 5: kv.DeleteResponse
-	(*RequestVoteRequest)(nil),      // 6: kv.RequestVoteRequest
-	(*RequestVoteResponse)(nil),     // 7: kv.RequestVoteResponse
-	(*TriggerElectionRequest)(nil),  // 8: kv.TriggerElectionRequest
-	(*TriggerElectionResponse)(nil), // 9: kv.TriggerElectionResponse
+	(*PutRequest)(nil),              // 0: proto.PutRequest
+	(*PutResponse)(nil),             // 1: proto.PutResponse
+	(*GetRequest)(nil),              // 2: proto.GetRequest
+	(*GetResponse)(nil),             // 3: proto.GetResponse
+	(*DeleteRequest)(nil),           // 4: proto.DeleteRequest
+	(*DeleteResponse)(nil),          // 5: proto.DeleteResponse
+	(*RequestVoteRequest)(nil),      // 6: proto.RequestVoteRequest
+	(*RequestVoteResponse)(nil),     // 7: proto.RequestVoteResponse
+	(*TriggerElectionRequest)(nil),  // 8: proto.TriggerElectionRequest
+	(*TriggerElectionResponse)(nil), // 9: proto.TriggerElectionResponse
+	(*ReplicatedLogEntry)(nil),      // 10: proto.ReplicatedLogEntry
+	(*AppendEntriesRequest)(nil),    // 11: proto.AppendEntriesRequest
+	(*AppendEntriesResponse)(nil),   // 12: proto.AppendEntriesResponse
 }
 var file_grpc_proto_kv_proto_depIdxs = []int32{
-	0, // 0: kv.KeyValueService.Put:input_type -> kv.PutRequest
-	2, // 1: kv.KeyValueService.Get:input_type -> kv.GetRequest
-	4, // 2: kv.KeyValueService.Delete:input_type -> kv.DeleteRequest
-	6, // 3: kv.KeyValueService.RequestVote:input_type -> kv.RequestVoteRequest
-	8, // 4: kv.KeyValueService.TriggerElection:input_type -> kv.TriggerElectionRequest
-	1, // 5: kv.KeyValueService.Put:output_type -> kv.PutResponse
-	3, // 6: kv.KeyValueService.Get:output_type -> kv.GetResponse
-	5, // 7: kv.KeyValueService.Delete:output_type -> kv.DeleteResponse
-	7, // 8: kv.KeyValueService.RequestVote:output_type -> kv.RequestVoteResponse
-	9, // 9: kv.KeyValueService.TriggerElection:output_type -> kv.TriggerElectionResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	10, // 0: proto.AppendEntriesRequest.entries:type_name -> proto.ReplicatedLogEntry
+	0,  // 1: proto.KeyValueService.Put:input_type -> proto.PutRequest
+	2,  // 2: proto.KeyValueService.Get:input_type -> proto.GetRequest
+	4,  // 3: proto.KeyValueService.Delete:input_type -> proto.DeleteRequest
+	6,  // 4: proto.KeyValueService.RequestVote:input_type -> proto.RequestVoteRequest
+	8,  // 5: proto.KeyValueService.TriggerElection:input_type -> proto.TriggerElectionRequest
+	11, // 6: proto.KeyValueService.AppendEntries:input_type -> proto.AppendEntriesRequest
+	1,  // 7: proto.KeyValueService.Put:output_type -> proto.PutResponse
+	3,  // 8: proto.KeyValueService.Get:output_type -> proto.GetResponse
+	5,  // 9: proto.KeyValueService.Delete:output_type -> proto.DeleteResponse
+	7,  // 10: proto.KeyValueService.RequestVote:output_type -> proto.RequestVoteResponse
+	9,  // 11: proto.KeyValueService.TriggerElection:output_type -> proto.TriggerElectionResponse
+	12, // 12: proto.KeyValueService.AppendEntries:output_type -> proto.AppendEntriesResponse
+	7,  // [7:13] is the sub-list for method output_type
+	1,  // [1:7] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_grpc_proto_kv_proto_init() }
@@ -660,7 +885,7 @@ func file_grpc_proto_kv_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_grpc_proto_kv_proto_rawDesc), len(file_grpc_proto_kv_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

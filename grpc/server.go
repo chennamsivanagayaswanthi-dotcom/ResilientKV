@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	pb "resilientkv/grpc/proto"
@@ -14,17 +15,19 @@ import (
 
 type Server struct {
 	pb.UnimplementedKeyValueServiceServer
+
 	engine       *storage.Engine
 	deduplicator *Deduplicator
 	raftNode     *raft.Node
+
+	heartbeatMu     sync.Mutex
+	heartbeatCancel context.CancelFunc
 }
 
-// NewServer preserves compatibility with the existing key-value server.
 func NewServer(engine *storage.Engine) *Server {
 	return newServer(engine, nil)
 }
 
-// NewServerWithRaft creates a server with Raft voting enabled.
 func NewServerWithRaft(engine *storage.Engine, node *raft.Node) *Server {
 	return newServer(engine, node)
 }
@@ -74,7 +77,6 @@ func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteR
 	return &pb.DeleteResponse{Success: true}, nil
 }
 
-// RequestVote handles an incoming Raft vote request.
 func (s *Server) RequestVote(
 	ctx context.Context,
 	req *pb.RequestVoteRequest,
@@ -101,7 +103,7 @@ func (s *Server) RequestVote(
 	}, nil
 }
 
-// TriggerElection starts a network election on this running server's Raft node.
+// TriggerElection starts an election and starts heartbeats if this node wins.
 func (s *Server) TriggerElection(
 	ctx context.Context,
 	req *pb.TriggerElectionRequest,
@@ -127,9 +129,86 @@ func (s *Server) TriggerElection(
 		return nil, status.Errorf(codes.InvalidArgument, "election could not start: %v", err)
 	}
 
+	if elected {
+		s.heartbeatMu.Lock()
+
+		if s.heartbeatCancel != nil {
+			s.heartbeatCancel()
+			s.heartbeatCancel = nil
+		}
+
+		heartbeatCtx, cancel := context.WithCancel(context.Background())
+		stop, startErr := s.raftNode.StartHeartbeats(
+			heartbeatCtx,
+			req.GetPeerAddresses(),
+			raft.HeartbeatConfig{
+				Interval: 500 * time.Millisecond,
+				Timeout:  300 * time.Millisecond,
+			},
+		)
+		if startErr != nil {
+			cancel()
+			s.heartbeatMu.Unlock()
+			return nil, status.Errorf(codes.Internal, "start heartbeats: %v", startErr)
+		}
+
+		s.heartbeatCancel = func() {
+			cancel()
+			stop()
+		}
+		s.heartbeatMu.Unlock()
+	}
+
 	return &pb.TriggerElectionResponse{
 		Elected: elected,
 		Term:    int32(s.raftNode.GetCurrentTerm()),
 		State:   s.raftNode.GetState().String(),
+	}, nil
+}
+
+// AppendEntries handles a Raft heartbeat or log replication request.
+func (s *Server) AppendEntries(
+	ctx context.Context,
+	req *pb.AppendEntriesRequest,
+) (*pb.AppendEntriesResponse, error) {
+	if req == nil || req.GetLeaderId() == "" ||
+		req.GetTerm() < 0 ||
+		req.GetPrevLogIndex() < 0 ||
+		req.GetPrevLogTerm() < 0 ||
+		req.GetLeaderCommit() < 0 {
+		return nil, status.Error(codes.InvalidArgument, "invalid AppendEntries request")
+	}
+
+	if s.raftNode == nil {
+		return nil, status.Error(codes.FailedPrecondition, "Raft node is not configured")
+	}
+
+	entries := make([]raft.LogEntry, 0, len(req.GetEntries()))
+	for _, entry := range req.GetEntries() {
+		if entry == nil || entry.GetTerm() < 0 || entry.GetTerm() > req.GetTerm() {
+			return nil, status.Error(codes.InvalidArgument, "invalid replicated log entry")
+		}
+
+		entries = append(entries, raft.LogEntry{
+			Term:    int(entry.GetTerm()),
+			Command: entry.GetCommand(),
+		})
+	}
+
+	result, err := s.raftNode.HandleAppendEntries(raft.AppendEntriesRequest{
+		Term:         int(req.GetTerm()),
+		LeaderID:     req.GetLeaderId(),
+		PrevLogIndex: int(req.GetPrevLogIndex()),
+		PrevLogTerm:  int(req.GetPrevLogTerm()),
+		Entries:      entries,
+		LeaderCommit: int(req.GetLeaderCommit()),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "AppendEntries failed: %v", err)
+	}
+
+	return &pb.AppendEntriesResponse{
+		Term:    int32(result.Term),
+		Success: result.Success,
 	}, nil
 }

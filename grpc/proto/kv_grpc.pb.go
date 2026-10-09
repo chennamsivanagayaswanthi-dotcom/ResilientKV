@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KeyValueService_Put_FullMethodName             = "/kv.KeyValueService/Put"
-	KeyValueService_Get_FullMethodName             = "/kv.KeyValueService/Get"
-	KeyValueService_Delete_FullMethodName          = "/kv.KeyValueService/Delete"
-	KeyValueService_RequestVote_FullMethodName     = "/kv.KeyValueService/RequestVote"
-	KeyValueService_TriggerElection_FullMethodName = "/kv.KeyValueService/TriggerElection"
+	KeyValueService_Put_FullMethodName             = "/proto.KeyValueService/Put"
+	KeyValueService_Get_FullMethodName             = "/proto.KeyValueService/Get"
+	KeyValueService_Delete_FullMethodName          = "/proto.KeyValueService/Delete"
+	KeyValueService_RequestVote_FullMethodName     = "/proto.KeyValueService/RequestVote"
+	KeyValueService_TriggerElection_FullMethodName = "/proto.KeyValueService/TriggerElection"
+	KeyValueService_AppendEntries_FullMethodName   = "/proto.KeyValueService/AppendEntries"
 )
 
 // KeyValueServiceClient is the client API for KeyValueService service.
@@ -35,6 +36,7 @@ type KeyValueServiceClient interface {
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	RequestVote(ctx context.Context, in *RequestVoteRequest, opts ...grpc.CallOption) (*RequestVoteResponse, error)
 	TriggerElection(ctx context.Context, in *TriggerElectionRequest, opts ...grpc.CallOption) (*TriggerElectionResponse, error)
+	AppendEntries(ctx context.Context, in *AppendEntriesRequest, opts ...grpc.CallOption) (*AppendEntriesResponse, error)
 }
 
 type keyValueServiceClient struct {
@@ -95,6 +97,16 @@ func (c *keyValueServiceClient) TriggerElection(ctx context.Context, in *Trigger
 	return out, nil
 }
 
+func (c *keyValueServiceClient) AppendEntries(ctx context.Context, in *AppendEntriesRequest, opts ...grpc.CallOption) (*AppendEntriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AppendEntriesResponse)
+	err := c.cc.Invoke(ctx, KeyValueService_AppendEntries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KeyValueServiceServer is the server API for KeyValueService service.
 // All implementations must embed UnimplementedKeyValueServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type KeyValueServiceServer interface {
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	RequestVote(context.Context, *RequestVoteRequest) (*RequestVoteResponse, error)
 	TriggerElection(context.Context, *TriggerElectionRequest) (*TriggerElectionResponse, error)
+	AppendEntries(context.Context, *AppendEntriesRequest) (*AppendEntriesResponse, error)
 	mustEmbedUnimplementedKeyValueServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedKeyValueServiceServer) RequestVote(context.Context, *RequestV
 }
 func (UnimplementedKeyValueServiceServer) TriggerElection(context.Context, *TriggerElectionRequest) (*TriggerElectionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TriggerElection not implemented")
+}
+func (UnimplementedKeyValueServiceServer) AppendEntries(context.Context, *AppendEntriesRequest) (*AppendEntriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AppendEntries not implemented")
 }
 func (UnimplementedKeyValueServiceServer) mustEmbedUnimplementedKeyValueServiceServer() {}
 func (UnimplementedKeyValueServiceServer) testEmbeddedByValue()                         {}
@@ -240,11 +256,29 @@ func _KeyValueService_TriggerElection_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KeyValueService_AppendEntries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppendEntriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeyValueServiceServer).AppendEntries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KeyValueService_AppendEntries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeyValueServiceServer).AppendEntries(ctx, req.(*AppendEntriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KeyValueService_ServiceDesc is the grpc.ServiceDesc for KeyValueService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var KeyValueService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "kv.KeyValueService",
+	ServiceName: "proto.KeyValueService",
 	HandlerType: (*KeyValueServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -266,6 +300,10 @@ var KeyValueService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TriggerElection",
 			Handler:    _KeyValueService_TriggerElection_Handler,
+		},
+		{
+			MethodName: "AppendEntries",
+			Handler:    _KeyValueService_AppendEntries_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
