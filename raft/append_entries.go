@@ -1,8 +1,6 @@
 package raft
 
-import (
-	"errors"
-)
+import "errors"
 
 // AppendEntriesRequest contains the information sent by a Raft leader.
 type AppendEntriesRequest struct {
@@ -21,6 +19,7 @@ type AppendEntriesResponse struct {
 }
 
 // HandleAppendEntries processes a leader heartbeat or log replication request.
+// PrevLogIndex is the number of entries preceding the incoming entries.
 func (n *Node) HandleAppendEntries(req AppendEntriesRequest) (AppendEntriesResponse, error) {
 	if n == nil {
 		return AppendEntriesResponse{}, errors.New("Raft node is nil")
@@ -44,69 +43,64 @@ func (n *Node) HandleAppendEntries(req AppendEntriesRequest) (AppendEntriesRespo
 
 	// Reject requests from an outdated leader.
 	if req.Term < n.CurrentTerm {
-		return AppendEntriesResponse{
-			Term: n.CurrentTerm, Success: false,
-		}, nil
+		return AppendEntriesResponse{Term: n.CurrentTerm, Success: false}, nil
 	}
 
-	// A newer term, or a valid leader in the current term, makes this
-	// node a follower.
+	// A current-term or newer leader makes this node a follower.
 	if req.Term > n.CurrentTerm {
 		n.CurrentTerm = req.Term
 		n.VotedFor = ""
 	}
 	n.State = Follower
 
-	// Raft log indexes in this request are zero-based positions.
+	// Verify that the follower contains the requested log prefix.
 	if req.PrevLogIndex > len(n.Log) {
-		return AppendEntriesResponse{
-			Term: n.CurrentTerm, Success: false,
-		}, nil
+		return AppendEntriesResponse{Term: n.CurrentTerm, Success: false}, nil
 	}
-
-	// Check that the preceding log entry matches the leader's log.
 	if req.PrevLogIndex > 0 {
 		localPrev := n.Log[req.PrevLogIndex-1]
 		if localPrev.Term != req.PrevLogTerm {
-			return AppendEntriesResponse{
-				Term: n.CurrentTerm, Success: false,
-			}, nil
+			return AppendEntriesResponse{Term: n.CurrentTerm, Success: false}, nil
 		}
 	}
 
-	// Keep matching entries. Replace conflicting entries and everything
-	// after them with the leader's entries.
+	// Reconcile incoming entries, replacing only a conflicting uncommitted
+	// suffix. CommitIndex is a count of committed entries.
 	for i, incoming := range req.Entries {
 		index := req.PrevLogIndex + i
 
-		if index < len(n.Log) {
-			if n.Log[index].Term != incoming.Term {
-				if index < n.CommitIndex {
-					return AppendEntriesResponse{
-						Term: n.CurrentTerm, Success: false,
-					}, nil
-				}
-				n.Log = n.Log[:index]
-				n.Log = append(n.Log, req.Entries[i:]...)
-				break
+		if index >= len(n.Log) {
+			n.Log = append(n.Log, req.Entries[i:]...)
+			break
+		}
+
+		local := n.Log[index]
+
+		if local.Term == incoming.Term {
+			// In a valid Raft log, equal index and term imply the same entry.
+			// Reject a different command rather than silently keeping it.
+			if local.Command != incoming.Command {
+				return AppendEntriesResponse{Term: n.CurrentTerm, Success: false}, nil
 			}
 			continue
 		}
 
-		n.Log = append(n.Log, req.Entries[i:]...)
+		// Never overwrite an entry that has already been committed.
+		if index < n.CommitIndex {
+			return AppendEntriesResponse{Term: n.CurrentTerm, Success: false}, nil
+		}
+
+		n.Log = append(n.Log[:index], req.Entries[i:]...)
 		break
 	}
 
-	// Never move the commit index backwards.
+	// Advance commitment only as far as the follower's log permits.
 	if req.LeaderCommit > n.CommitIndex {
-		if req.LeaderCommit < len(n.Log) {
-			n.CommitIndex = req.LeaderCommit
-		} else {
+		n.CommitIndex = req.LeaderCommit
+		if n.CommitIndex > len(n.Log) {
 			n.CommitIndex = len(n.Log)
 		}
 	}
 
-	return AppendEntriesResponse{
-		Term: n.CurrentTerm, Success: true,
-	}, nil
+	return AppendEntriesResponse{Term: n.CurrentTerm, Success: true}, nil
 }
