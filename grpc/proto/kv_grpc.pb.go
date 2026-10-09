@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KeyValueService_Put_FullMethodName    = "/kv.KeyValueService/Put"
-	KeyValueService_Get_FullMethodName    = "/kv.KeyValueService/Get"
-	KeyValueService_Delete_FullMethodName = "/kv.KeyValueService/Delete"
+	KeyValueService_Put_FullMethodName         = "/kv.KeyValueService/Put"
+	KeyValueService_Get_FullMethodName         = "/kv.KeyValueService/Get"
+	KeyValueService_Delete_FullMethodName      = "/kv.KeyValueService/Delete"
+	KeyValueService_RequestVote_FullMethodName = "/kv.KeyValueService/RequestVote"
 )
 
 // KeyValueServiceClient is the client API for KeyValueService service.
@@ -31,6 +32,7 @@ type KeyValueServiceClient interface {
 	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*PutResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	RequestVote(ctx context.Context, in *RequestVoteRequest, opts ...grpc.CallOption) (*RequestVoteResponse, error)
 }
 
 type keyValueServiceClient struct {
@@ -71,6 +73,16 @@ func (c *keyValueServiceClient) Delete(ctx context.Context, in *DeleteRequest, o
 	return out, nil
 }
 
+func (c *keyValueServiceClient) RequestVote(ctx context.Context, in *RequestVoteRequest, opts ...grpc.CallOption) (*RequestVoteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RequestVoteResponse)
+	err := c.cc.Invoke(ctx, KeyValueService_RequestVote_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KeyValueServiceServer is the server API for KeyValueService service.
 // All implementations must embed UnimplementedKeyValueServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type KeyValueServiceServer interface {
 	Put(context.Context, *PutRequest) (*PutResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	RequestVote(context.Context, *RequestVoteRequest) (*RequestVoteResponse, error)
 	mustEmbedUnimplementedKeyValueServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedKeyValueServiceServer) Get(context.Context, *GetRequest) (*Ge
 }
 func (UnimplementedKeyValueServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedKeyValueServiceServer) RequestVote(context.Context, *RequestVoteRequest) (*RequestVoteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RequestVote not implemented")
 }
 func (UnimplementedKeyValueServiceServer) mustEmbedUnimplementedKeyValueServiceServer() {}
 func (UnimplementedKeyValueServiceServer) testEmbeddedByValue()                         {}
@@ -172,6 +188,24 @@ func _KeyValueService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KeyValueService_RequestVote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestVoteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeyValueServiceServer).RequestVote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KeyValueService_RequestVote_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeyValueServiceServer).RequestVote(ctx, req.(*RequestVoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KeyValueService_ServiceDesc is the grpc.ServiceDesc for KeyValueService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var KeyValueService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _KeyValueService_Delete_Handler,
+		},
+		{
+			MethodName: "RequestVote",
+			Handler:    _KeyValueService_RequestVote_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

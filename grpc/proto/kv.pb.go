@@ -325,6 +325,126 @@ func (x *DeleteResponse) GetSuccess() bool {
 	return false
 }
 
+type RequestVoteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CandidateId   string                 `protobuf:"bytes,1,opt,name=candidate_id,json=candidateId,proto3" json:"candidate_id,omitempty"`
+	Term          int32                  `protobuf:"varint,2,opt,name=term,proto3" json:"term,omitempty"`
+	LastLogIndex  int32                  `protobuf:"varint,3,opt,name=last_log_index,json=lastLogIndex,proto3" json:"last_log_index,omitempty"`
+	LastLogTerm   int32                  `protobuf:"varint,4,opt,name=last_log_term,json=lastLogTerm,proto3" json:"last_log_term,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestVoteRequest) Reset() {
+	*x = RequestVoteRequest{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestVoteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestVoteRequest) ProtoMessage() {}
+
+func (x *RequestVoteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestVoteRequest.ProtoReflect.Descriptor instead.
+func (*RequestVoteRequest) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RequestVoteRequest) GetCandidateId() string {
+	if x != nil {
+		return x.CandidateId
+	}
+	return ""
+}
+
+func (x *RequestVoteRequest) GetTerm() int32 {
+	if x != nil {
+		return x.Term
+	}
+	return 0
+}
+
+func (x *RequestVoteRequest) GetLastLogIndex() int32 {
+	if x != nil {
+		return x.LastLogIndex
+	}
+	return 0
+}
+
+func (x *RequestVoteRequest) GetLastLogTerm() int32 {
+	if x != nil {
+		return x.LastLogTerm
+	}
+	return 0
+}
+
+type RequestVoteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Term          int32                  `protobuf:"varint,1,opt,name=term,proto3" json:"term,omitempty"`
+	VoteGranted   bool                   `protobuf:"varint,2,opt,name=vote_granted,json=voteGranted,proto3" json:"vote_granted,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestVoteResponse) Reset() {
+	*x = RequestVoteResponse{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestVoteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestVoteResponse) ProtoMessage() {}
+
+func (x *RequestVoteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestVoteResponse.ProtoReflect.Descriptor instead.
+func (*RequestVoteResponse) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RequestVoteResponse) GetTerm() int32 {
+	if x != nil {
+		return x.Term
+	}
+	return 0
+}
+
+func (x *RequestVoteResponse) GetVoteGranted() bool {
+	if x != nil {
+		return x.VoteGranted
+	}
+	return false
+}
+
 var File_grpc_proto_kv_proto protoreflect.FileDescriptor
 
 const file_grpc_proto_kv_proto_rawDesc = "" +
@@ -351,11 +471,20 @@ const file_grpc_proto_kv_proto_rawDesc = "" +
 	"\n" +
 	"request_id\x18\x02 \x01(\tR\trequestId\"*\n" +
 	"\x0eDeleteResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\x92\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x95\x01\n" +
+	"\x12RequestVoteRequest\x12!\n" +
+	"\fcandidate_id\x18\x01 \x01(\tR\vcandidateId\x12\x12\n" +
+	"\x04term\x18\x02 \x01(\x05R\x04term\x12$\n" +
+	"\x0elast_log_index\x18\x03 \x01(\x05R\flastLogIndex\x12\"\n" +
+	"\rlast_log_term\x18\x04 \x01(\x05R\vlastLogTerm\"L\n" +
+	"\x13RequestVoteResponse\x12\x12\n" +
+	"\x04term\x18\x01 \x01(\x05R\x04term\x12!\n" +
+	"\fvote_granted\x18\x02 \x01(\bR\vvoteGranted2\xd2\x01\n" +
 	"\x0fKeyValueService\x12&\n" +
 	"\x03Put\x12\x0e.kv.PutRequest\x1a\x0f.kv.PutResponse\x12&\n" +
 	"\x03Get\x12\x0e.kv.GetRequest\x1a\x0f.kv.GetResponse\x12/\n" +
-	"\x06Delete\x12\x11.kv.DeleteRequest\x1a\x12.kv.DeleteResponseB\x1eZ\x1cresilientkv/grpc/proto;protob\x06proto3"
+	"\x06Delete\x12\x11.kv.DeleteRequest\x1a\x12.kv.DeleteResponse\x12>\n" +
+	"\vRequestVote\x12\x16.kv.RequestVoteRequest\x1a\x17.kv.RequestVoteResponseB\x1eZ\x1cresilientkv/grpc/proto;protob\x06proto3"
 
 var (
 	file_grpc_proto_kv_proto_rawDescOnce sync.Once
@@ -369,24 +498,28 @@ func file_grpc_proto_kv_proto_rawDescGZIP() []byte {
 	return file_grpc_proto_kv_proto_rawDescData
 }
 
-var file_grpc_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_grpc_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_grpc_proto_kv_proto_goTypes = []any{
-	(*PutRequest)(nil),     // 0: kv.PutRequest
-	(*PutResponse)(nil),    // 1: kv.PutResponse
-	(*GetRequest)(nil),     // 2: kv.GetRequest
-	(*GetResponse)(nil),    // 3: kv.GetResponse
-	(*DeleteRequest)(nil),  // 4: kv.DeleteRequest
-	(*DeleteResponse)(nil), // 5: kv.DeleteResponse
+	(*PutRequest)(nil),          // 0: kv.PutRequest
+	(*PutResponse)(nil),         // 1: kv.PutResponse
+	(*GetRequest)(nil),          // 2: kv.GetRequest
+	(*GetResponse)(nil),         // 3: kv.GetResponse
+	(*DeleteRequest)(nil),       // 4: kv.DeleteRequest
+	(*DeleteResponse)(nil),      // 5: kv.DeleteResponse
+	(*RequestVoteRequest)(nil),  // 6: kv.RequestVoteRequest
+	(*RequestVoteResponse)(nil), // 7: kv.RequestVoteResponse
 }
 var file_grpc_proto_kv_proto_depIdxs = []int32{
 	0, // 0: kv.KeyValueService.Put:input_type -> kv.PutRequest
 	2, // 1: kv.KeyValueService.Get:input_type -> kv.GetRequest
 	4, // 2: kv.KeyValueService.Delete:input_type -> kv.DeleteRequest
-	1, // 3: kv.KeyValueService.Put:output_type -> kv.PutResponse
-	3, // 4: kv.KeyValueService.Get:output_type -> kv.GetResponse
-	5, // 5: kv.KeyValueService.Delete:output_type -> kv.DeleteResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	6, // 3: kv.KeyValueService.RequestVote:input_type -> kv.RequestVoteRequest
+	1, // 4: kv.KeyValueService.Put:output_type -> kv.PutResponse
+	3, // 5: kv.KeyValueService.Get:output_type -> kv.GetResponse
+	5, // 6: kv.KeyValueService.Delete:output_type -> kv.DeleteResponse
+	7, // 7: kv.KeyValueService.RequestVote:output_type -> kv.RequestVoteResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -403,7 +536,7 @@ func file_grpc_proto_kv_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_grpc_proto_kv_proto_rawDesc), len(file_grpc_proto_kv_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
