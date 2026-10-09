@@ -4,6 +4,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
+	"time"
 
 	rpcserver "resilientkv/grpc"
 	pb "resilientkv/grpc/proto"
@@ -41,6 +43,38 @@ func main() {
 
 	server := rpcserver.NewServerWithRaft(engine, raftNode)
 	pb.RegisterKeyValueServiceServer(grpcServer, server)
+
+	// Optional one-time network election at startup.
+	if strings.EqualFold(os.Getenv("RAFT_START_ELECTION"), "true") {
+		peersValue := os.Getenv("RAFT_PEERS")
+		if strings.TrimSpace(peersValue) == "" {
+			log.Fatal("RAFT_START_ELECTION=true requires RAFT_PEERS")
+		}
+
+		var peers []string
+		for _, address := range strings.Split(peersValue, ",") {
+			address = strings.TrimSpace(address)
+			if address == "" {
+				log.Fatal("RAFT_PEERS contains an empty address")
+			}
+			peers = append(peers, address)
+		}
+
+		log.Printf("Node %s starting network election; peers=%v", nodeID, peers)
+
+		elected, electionErr := raftNode.ConductNetworkElection(
+			peers,
+			2*time.Second,
+		)
+		if electionErr != nil {
+			log.Printf("Network election failed: %v", electionErr)
+		} else if elected {
+			log.Printf("Node %s won the election for term %d", nodeID, raftNode.GetCurrentTerm())
+		} else {
+			log.Printf("Node %s did not obtain a majority; state=%s term=%d",
+				nodeID, raftNode.State, raftNode.GetCurrentTerm())
+		}
+	}
 
 	log.Printf(
 		"ResilientKV server running: node=%s port=%s state=%s",

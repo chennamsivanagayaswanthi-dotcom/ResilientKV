@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"time"
 
 	pb "resilientkv/grpc/proto"
 	"resilientkv/raft"
@@ -54,11 +55,7 @@ func (s *Server) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutResponse, 
 
 func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
 	value, exists := s.engine.Get(req.GetKey())
-
-	return &pb.GetResponse{
-		Value: value,
-		Found: exists,
-	}, nil
+	return &pb.GetResponse{Value: value, Found: exists}, nil
 }
 
 func (s *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteResponse, error) {
@@ -88,10 +85,7 @@ func (s *Server) RequestVote(
 	}
 
 	if s.raftNode == nil {
-		return nil, status.Error(
-			codes.FailedPrecondition,
-			"Raft node is not configured on this server",
-		)
+		return nil, status.Error(codes.FailedPrecondition, "Raft node is not configured")
 	}
 
 	granted := s.raftNode.RequestVote(
@@ -104,5 +98,38 @@ func (s *Server) RequestVote(
 	return &pb.RequestVoteResponse{
 		Term:        int32(s.raftNode.GetCurrentTerm()),
 		VoteGranted: granted,
+	}, nil
+}
+
+// TriggerElection starts a network election on this running server's Raft node.
+func (s *Server) TriggerElection(
+	ctx context.Context,
+	req *pb.TriggerElectionRequest,
+) (*pb.TriggerElectionResponse, error) {
+	if req == nil || len(req.GetPeerAddresses()) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "at least one peer address is required")
+	}
+
+	timeoutMillis := req.GetTimeoutMillis()
+	if timeoutMillis <= 0 || timeoutMillis > 30000 {
+		return nil, status.Error(codes.InvalidArgument, "timeout_millis must be between 1 and 30000")
+	}
+
+	if s.raftNode == nil {
+		return nil, status.Error(codes.FailedPrecondition, "Raft node is not configured")
+	}
+
+	elected, err := s.raftNode.ConductNetworkElection(
+		req.GetPeerAddresses(),
+		time.Duration(timeoutMillis)*time.Millisecond,
+	)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "election could not start: %v", err)
+	}
+
+	return &pb.TriggerElectionResponse{
+		Elected: elected,
+		Term:    int32(s.raftNode.GetCurrentTerm()),
+		State:   s.raftNode.GetState().String(),
 	}, nil
 }

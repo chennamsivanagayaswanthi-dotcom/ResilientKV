@@ -9,6 +9,7 @@ service KeyValueService {
     rpc Get(GetRequest) returns (GetResponse);
     rpc Delete(DeleteRequest) returns (DeleteResponse);
     rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+    rpc TriggerElection(TriggerElectionRequest) returns (TriggerElectionResponse);
 }
 
 message PutRequest {
@@ -50,4 +51,15 @@ message RequestVoteRequest {
 message RequestVoteResponse {
     int32 term = 1;
     bool vote_granted = 2;
+}
+
+message TriggerElectionRequest {
+    repeated string peer_addresses = 1;
+    int32 timeout_millis = 2;
+}
+
+message TriggerElectionResponse {
+    bool elected = 1;
+    int32 term = 2;
+    string state = 3;
 }

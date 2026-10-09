@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KeyValueService_Put_FullMethodName         = "/kv.KeyValueService/Put"
-	KeyValueService_Get_FullMethodName         = "/kv.KeyValueService/Get"
-	KeyValueService_Delete_FullMethodName      = "/kv.KeyValueService/Delete"
-	KeyValueService_RequestVote_FullMethodName = "/kv.KeyValueService/RequestVote"
+	KeyValueService_Put_FullMethodName             = "/kv.KeyValueService/Put"
+	KeyValueService_Get_FullMethodName             = "/kv.KeyValueService/Get"
+	KeyValueService_Delete_FullMethodName          = "/kv.KeyValueService/Delete"
+	KeyValueService_RequestVote_FullMethodName     = "/kv.KeyValueService/RequestVote"
+	KeyValueService_TriggerElection_FullMethodName = "/kv.KeyValueService/TriggerElection"
 )
 
 // KeyValueServiceClient is the client API for KeyValueService service.
@@ -33,6 +34,7 @@ type KeyValueServiceClient interface {
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	RequestVote(ctx context.Context, in *RequestVoteRequest, opts ...grpc.CallOption) (*RequestVoteResponse, error)
+	TriggerElection(ctx context.Context, in *TriggerElectionRequest, opts ...grpc.CallOption) (*TriggerElectionResponse, error)
 }
 
 type keyValueServiceClient struct {
@@ -83,6 +85,16 @@ func (c *keyValueServiceClient) RequestVote(ctx context.Context, in *RequestVote
 	return out, nil
 }
 
+func (c *keyValueServiceClient) TriggerElection(ctx context.Context, in *TriggerElectionRequest, opts ...grpc.CallOption) (*TriggerElectionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TriggerElectionResponse)
+	err := c.cc.Invoke(ctx, KeyValueService_TriggerElection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KeyValueServiceServer is the server API for KeyValueService service.
 // All implementations must embed UnimplementedKeyValueServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type KeyValueServiceServer interface {
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	RequestVote(context.Context, *RequestVoteRequest) (*RequestVoteResponse, error)
+	TriggerElection(context.Context, *TriggerElectionRequest) (*TriggerElectionResponse, error)
 	mustEmbedUnimplementedKeyValueServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedKeyValueServiceServer) Delete(context.Context, *DeleteRequest
 }
 func (UnimplementedKeyValueServiceServer) RequestVote(context.Context, *RequestVoteRequest) (*RequestVoteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RequestVote not implemented")
+}
+func (UnimplementedKeyValueServiceServer) TriggerElection(context.Context, *TriggerElectionRequest) (*TriggerElectionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TriggerElection not implemented")
 }
 func (UnimplementedKeyValueServiceServer) mustEmbedUnimplementedKeyValueServiceServer() {}
 func (UnimplementedKeyValueServiceServer) testEmbeddedByValue()                         {}
@@ -206,6 +222,24 @@ func _KeyValueService_RequestVote_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KeyValueService_TriggerElection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TriggerElectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeyValueServiceServer).TriggerElection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KeyValueService_TriggerElection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeyValueServiceServer).TriggerElection(ctx, req.(*TriggerElectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KeyValueService_ServiceDesc is the grpc.ServiceDesc for KeyValueService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var KeyValueService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RequestVote",
 			Handler:    _KeyValueService_RequestVote_Handler,
+		},
+		{
+			MethodName: "TriggerElection",
+			Handler:    _KeyValueService_TriggerElection_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

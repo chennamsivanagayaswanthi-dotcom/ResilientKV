@@ -445,6 +445,118 @@ func (x *RequestVoteResponse) GetVoteGranted() bool {
 	return false
 }
 
+type TriggerElectionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PeerAddresses []string               `protobuf:"bytes,1,rep,name=peer_addresses,json=peerAddresses,proto3" json:"peer_addresses,omitempty"`
+	TimeoutMillis int32                  `protobuf:"varint,2,opt,name=timeout_millis,json=timeoutMillis,proto3" json:"timeout_millis,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TriggerElectionRequest) Reset() {
+	*x = TriggerElectionRequest{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerElectionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerElectionRequest) ProtoMessage() {}
+
+func (x *TriggerElectionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerElectionRequest.ProtoReflect.Descriptor instead.
+func (*TriggerElectionRequest) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *TriggerElectionRequest) GetPeerAddresses() []string {
+	if x != nil {
+		return x.PeerAddresses
+	}
+	return nil
+}
+
+func (x *TriggerElectionRequest) GetTimeoutMillis() int32 {
+	if x != nil {
+		return x.TimeoutMillis
+	}
+	return 0
+}
+
+type TriggerElectionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Elected       bool                   `protobuf:"varint,1,opt,name=elected,proto3" json:"elected,omitempty"`
+	Term          int32                  `protobuf:"varint,2,opt,name=term,proto3" json:"term,omitempty"`
+	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TriggerElectionResponse) Reset() {
+	*x = TriggerElectionResponse{}
+	mi := &file_grpc_proto_kv_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerElectionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerElectionResponse) ProtoMessage() {}
+
+func (x *TriggerElectionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_kv_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerElectionResponse.ProtoReflect.Descriptor instead.
+func (*TriggerElectionResponse) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_kv_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *TriggerElectionResponse) GetElected() bool {
+	if x != nil {
+		return x.Elected
+	}
+	return false
+}
+
+func (x *TriggerElectionResponse) GetTerm() int32 {
+	if x != nil {
+		return x.Term
+	}
+	return 0
+}
+
+func (x *TriggerElectionResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
 var File_grpc_proto_kv_proto protoreflect.FileDescriptor
 
 const file_grpc_proto_kv_proto_rawDesc = "" +
@@ -479,12 +591,20 @@ const file_grpc_proto_kv_proto_rawDesc = "" +
 	"\rlast_log_term\x18\x04 \x01(\x05R\vlastLogTerm\"L\n" +
 	"\x13RequestVoteResponse\x12\x12\n" +
 	"\x04term\x18\x01 \x01(\x05R\x04term\x12!\n" +
-	"\fvote_granted\x18\x02 \x01(\bR\vvoteGranted2\xd2\x01\n" +
+	"\fvote_granted\x18\x02 \x01(\bR\vvoteGranted\"f\n" +
+	"\x16TriggerElectionRequest\x12%\n" +
+	"\x0epeer_addresses\x18\x01 \x03(\tR\rpeerAddresses\x12%\n" +
+	"\x0etimeout_millis\x18\x02 \x01(\x05R\rtimeoutMillis\"]\n" +
+	"\x17TriggerElectionResponse\x12\x18\n" +
+	"\aelected\x18\x01 \x01(\bR\aelected\x12\x12\n" +
+	"\x04term\x18\x02 \x01(\x05R\x04term\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state2\x9e\x02\n" +
 	"\x0fKeyValueService\x12&\n" +
 	"\x03Put\x12\x0e.kv.PutRequest\x1a\x0f.kv.PutResponse\x12&\n" +
 	"\x03Get\x12\x0e.kv.GetRequest\x1a\x0f.kv.GetResponse\x12/\n" +
 	"\x06Delete\x12\x11.kv.DeleteRequest\x1a\x12.kv.DeleteResponse\x12>\n" +
-	"\vRequestVote\x12\x16.kv.RequestVoteRequest\x1a\x17.kv.RequestVoteResponseB\x1eZ\x1cresilientkv/grpc/proto;protob\x06proto3"
+	"\vRequestVote\x12\x16.kv.RequestVoteRequest\x1a\x17.kv.RequestVoteResponse\x12J\n" +
+	"\x0fTriggerElection\x12\x1a.kv.TriggerElectionRequest\x1a\x1b.kv.TriggerElectionResponseB\x1eZ\x1cresilientkv/grpc/proto;protob\x06proto3"
 
 var (
 	file_grpc_proto_kv_proto_rawDescOnce sync.Once
@@ -498,28 +618,32 @@ func file_grpc_proto_kv_proto_rawDescGZIP() []byte {
 	return file_grpc_proto_kv_proto_rawDescData
 }
 
-var file_grpc_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_grpc_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_grpc_proto_kv_proto_goTypes = []any{
-	(*PutRequest)(nil),          // 0: kv.PutRequest
-	(*PutResponse)(nil),         // 1: kv.PutResponse
-	(*GetRequest)(nil),          // 2: kv.GetRequest
-	(*GetResponse)(nil),         // 3: kv.GetResponse
-	(*DeleteRequest)(nil),       // 4: kv.DeleteRequest
-	(*DeleteResponse)(nil),      // 5: kv.DeleteResponse
-	(*RequestVoteRequest)(nil),  // 6: kv.RequestVoteRequest
-	(*RequestVoteResponse)(nil), // 7: kv.RequestVoteResponse
+	(*PutRequest)(nil),              // 0: kv.PutRequest
+	(*PutResponse)(nil),             // 1: kv.PutResponse
+	(*GetRequest)(nil),              // 2: kv.GetRequest
+	(*GetResponse)(nil),             // 3: kv.GetResponse
+	(*DeleteRequest)(nil),           // 4: kv.DeleteRequest
+	(*DeleteResponse)(nil),          // 5: kv.DeleteResponse
+	(*RequestVoteRequest)(nil),      // 6: kv.RequestVoteRequest
+	(*RequestVoteResponse)(nil),     // 7: kv.RequestVoteResponse
+	(*TriggerElectionRequest)(nil),  // 8: kv.TriggerElectionRequest
+	(*TriggerElectionResponse)(nil), // 9: kv.TriggerElectionResponse
 }
 var file_grpc_proto_kv_proto_depIdxs = []int32{
 	0, // 0: kv.KeyValueService.Put:input_type -> kv.PutRequest
 	2, // 1: kv.KeyValueService.Get:input_type -> kv.GetRequest
 	4, // 2: kv.KeyValueService.Delete:input_type -> kv.DeleteRequest
 	6, // 3: kv.KeyValueService.RequestVote:input_type -> kv.RequestVoteRequest
-	1, // 4: kv.KeyValueService.Put:output_type -> kv.PutResponse
-	3, // 5: kv.KeyValueService.Get:output_type -> kv.GetResponse
-	5, // 6: kv.KeyValueService.Delete:output_type -> kv.DeleteResponse
-	7, // 7: kv.KeyValueService.RequestVote:output_type -> kv.RequestVoteResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	8, // 4: kv.KeyValueService.TriggerElection:input_type -> kv.TriggerElectionRequest
+	1, // 5: kv.KeyValueService.Put:output_type -> kv.PutResponse
+	3, // 6: kv.KeyValueService.Get:output_type -> kv.GetResponse
+	5, // 7: kv.KeyValueService.Delete:output_type -> kv.DeleteResponse
+	7, // 8: kv.KeyValueService.RequestVote:output_type -> kv.RequestVoteResponse
+	9, // 9: kv.KeyValueService.TriggerElection:output_type -> kv.TriggerElectionResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -536,7 +660,7 @@ func file_grpc_proto_kv_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_grpc_proto_kv_proto_rawDesc), len(file_grpc_proto_kv_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
