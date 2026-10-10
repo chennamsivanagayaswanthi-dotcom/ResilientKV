@@ -1,0 +1,4 @@
+=== RUN   TestRaftPutReplicatesToFollowerOverGRPC
+--- PASS: TestRaftPutReplicatesToFollowerOverGRPC (0.03s)
+PASS
+ok  	resilientkv/grpc	0.045s
