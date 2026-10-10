@@ -185,3 +185,17 @@ The implementation provides a foundation for further research and development in
 
 ---
 
+## Resource Monitoring
+
+ResilientKV includes a Python-based monitoring script that checks the availability of three server nodes on ports 50051, 50052, and 50053. It records CPU and memory usage in a CSV file and generates a graph using Matplotlib.
+
+**Files:**
+- `monitor.py` — monitors server availability and system resource usage.
+- `plot_monitoring.py` — generates the resource usage graph.
+- `monitoring_results.csv` — stores monitoring results.
+- `monitoring_graph.png` — visualizes CPU and memory usage.
+- `evidence/` — stores monitoring output and project test evidence.
+
+**Observation:** All three server ports were reported as UP during the recorded monitoring run. CPU and memory readings represent overall Linux system usage, not individual server processes.
+
+**Result:** Resource monitoring results were collected and visualized successfully.
