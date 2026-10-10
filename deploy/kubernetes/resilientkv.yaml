@@ -1,0 +1,43 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resilientkv
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: resilientkv
+  template:
+    metadata:
+      labels:
+        app: resilientkv
+    spec:
+      containers:
+        - name: resilientkv
+          image: resilientkv:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 50051
+          env:
+            - name: RESILIENTKV_PORT
+              value: "50051"
+            - name: RESILIENTKV_DATA_DIR
+              value: /data
+          volumeMounts:
+            - name: storage
+              mountPath: /data
+      volumes:
+        - name: storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resilientkv
+spec:
+  selector:
+    app: resilientkv
+  ports:
+    - port: 50051
+      targetPort: 50051
