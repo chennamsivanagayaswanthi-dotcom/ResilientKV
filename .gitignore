@@ -17,3 +17,4 @@ Thumbs.db
 
 # Native benchmark binaries
 benchmarks/rocksdb/rocksdb_benchmark
+.venv/
