@@ -1,0 +1,6 @@
+Election result: elected=true term=7 state=Leader
+After stopping node1 (PID 5601):
+LISTEN 0      4096                *:50053            *:*    users:(("server",pid=4550,fd=7))
+LISTEN 0      4096                *:50052            *:*    users:(("server",pid=4409,fd=7))
+After node1 failure, manual recovery election:
+Election result: elected=true term=8 state=Leader
