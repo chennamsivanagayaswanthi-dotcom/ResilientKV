@@ -1,0 +1,14 @@
+=== Three-node cluster listeners ===
+LISTEN 0      4096                *:50051            *:*    users:(("server",pid=2020,fd=7))
+LISTEN 0      4096                *:50053            *:*    users:(("server",pid=4550,fd=7))
+LISTEN 0      4096                *:50052            *:*    users:(("server",pid=4409,fd=7))
+
+=== Raft election ===
+2026/10/10 14:50:02 Election result: elected=true term=5 state=Leader
+
+=== Client PUT/GET demo ===
+2026/10/10 14:50:02 Sending PUT request...
+2026/10/10 14:50:02 First PUT: success=true
+2026/10/10 14:50:02 Retrying SAME PUT request...
+2026/10/10 14:50:02 Retry PUT: success=true
+2026/10/10 14:50:02 GET: key=product value=laptop found=true
