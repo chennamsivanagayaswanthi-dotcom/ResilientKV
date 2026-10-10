@@ -1,283 +1,187 @@
-# ResilientKV
-### A Distributed Key–Value Store with Raft Consensus
+# ResilientKV: Design and Implementation of a Fault-Tolerant Distributed Key-Value Store Using Go, gRPC, and Raft Consensus
 
-ResilientKV is an educational distributed key–value store project built to explore how storage engines, service communication, consensus, testing, and operations work together in a distributed system.
-
-The project uses **Go**, an **LSM-tree-style storage engine**, **gRPC**, and **Raft-related replication components**. The goal is to build a system that stores key–value data, communicates through a client/server API, and explores how data can be coordinated across multiple nodes.
-
-> **Project status:** Core storage, gRPC, and Raft-related functionality has been implemented and tested in the development workflow. Kubernetes deployment, complete observability, extensive fault-injection testing, and comparative performance reports should be marked complete only after their results have been produced and documented.
+**Project Type:** M.Tech Computer Science and Engineering Project  
+**Domain:** Operating Systems and Distributed Systems  
+**Implementation Language:** Go
 
 ---
 
-## 1. Project at a Glance
+## 1. Problem Statement
 
-| Item | Details |
+Distributed applications require storage systems that support persistent data storage, efficient access, concurrent operations, and consistency across multiple nodes. Failures in individual components can affect data availability and reliability.
+
+ResilientKV aims to address these challenges by developing a distributed key-value store using Go, persistent storage structures, gRPC communication, and the Raft consensus algorithm.
+
+## 2. Objectives
+
+- Design and implement a key-value storage engine using Go.
+- Provide persistent storage using a Write-Ahead Log (WAL), Memtable, and SSTables.
+- Support GET and PUT operations for storing and retrieving data.
+- Enable client-server communication through gRPC and Protocol Buffers.
+- Implement Raft-based leader election and log replication.
+- Validate storage correctness, persistence, concurrency, and replication through automated tests.
+- Identify limitations and explore improvements in fault tolerance and performance.
+
+## 3. Technologies Used
+
+| Technology | Purpose |
 |---|---|
-| Project | ResilientKV |
-| Category | Distributed Systems / Operating Systems |
-| Main language | Go |
-| API communication | gRPC and Protocol Buffers |
-| Storage design | Write-Ahead Log (WAL), Memtable, SSTable, compaction |
-| Distributed coordination | Raft-related election, replication, and commit handling |
-| Testing | Go unit/integration tests; race detector where available |
-| Repository | [ResilientKV on GitHub](https://github.com/chennamsivanagayaswanthi-dotcom/ResilientKV) |
+| Go | Core system implementation |
+| gRPC | Communication between clients and servers |
+| Protocol Buffers | Service and message definitions |
+| Write-Ahead Log (WAL) | Recording storage operations for recovery |
+| Memtable | Managing recent updates in memory |
+| SSTables | Storing sorted data persistently |
+| Raft Consensus | Leader election and log replication |
+| Go Testing | Functional and integration testing |
+| Go Race Detector | Detecting data races |
 
-## 2. Problem Statement
+## 4. System Architecture
 
-Applications need to store data and retrieve it reliably. In a distributed system, multiple nodes may need to coordinate updates, and failures can interrupt communication or access to a node.
+ResilientKV follows a modular architecture that separates client requests, communication, consensus, and storage.
 
-ResilientKV is designed as a learning project to investigate these challenges:
+### Components
 
-- How can key–value data be stored efficiently?
-- How can recent writes be recovered after a process failure?
-- How can clients communicate with a storage service?
-- How can nodes coordinate replicated log entries?
-- How can correctness and performance be tested?
+1. **Client Layer:** Sends GET and PUT requests to the server.
+2. **gRPC Communication Layer:** Transfers requests and responses between clients and servers.
+3. **Raft Consensus Layer:** Coordinates leader election, voting, and log replication.
+4. **Storage Engine:** Manages key-value data using the WAL, Memtable, SSTables, and compaction.
+5. **Testing Layer:** Verifies storage operations, recovery behavior, replication, and concurrency.
 
-## 3. Project Objectives
-
-1. Implement key–value operations such as `PUT` and `GET`.
-2. Build storage components using a WAL, memtable, SSTables, and compaction.
-3. Provide client/server communication through gRPC.
-4. Implement and test Raft-related leader election, log replication, and commit handling.
-5. Test correctness and concurrency, and document reproducible performance measurements.
-6. Prepare deployment, monitoring, and fault-injection artifacts as part of the full project roadmap.
-
-## 4. Architecture
+### Request Flow
 
 ```text
-                    +----------------------+
-                    |      Go Client       |
-                    |      PUT / GET       |
-                    +----------+-----------+
-                               |
-                               | gRPC
-                               v
-                    +----------------------+
-                    |   Service / Routing  |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    | Raft-related Layer   |
-                    | Election / Replication|
-                    | Commit Handling      |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |    Storage Engine    |
-                    | WAL -> Memtable      |
-                    |      -> SSTables     |
-                    |      -> Compaction   |
-                    +----------------------+
+        Client
+          |
+          v
+     gRPC Server
+          |
+          v
+     Raft Processing
+          |
+          v
+     Storage Engine
+          |
+          v
+  WAL + Memtable + SSTables
+          |
+          v
+   Response to Client
 ```
 
-**Important concepts**
+*The diagram illustrates the logical request flow. The exact execution path depends on the implemented leader-handling and replication logic.*
 
-- **Client:** Sends requests to store or retrieve a key/value pair.
-- **gRPC:** Carries typed requests and responses between client and service.
-- **Raft:** Provides rules for coordinating replicated log entries among nodes.
-- **WAL:** Records changes so recovery can replay them.
-- **Memtable:** Holds recent updates in memory.
-- **SSTable:** Stores sorted, immutable data on disk.
-- **Compaction:** Merges storage files and handles obsolete entries.
+## 5. Development Roadmap: Week 1–12
 
-The diagram is a conceptual overview. The exact request path and guarantees depend on the implemented configuration and code.
+### Week 1: Requirement Analysis
+Defined the project problem, objectives, scope, and expected outcomes. Identified the need for persistent storage, efficient data access, and reliable communication between distributed nodes.
 
-## 5. Technology Stack
+### Week 2: System Architecture and Setup
+Designed the modular architecture and organized the Go project into storage, communication, consensus, and testing components. Prepared the development environment and project structure.
 
-- **Go:** Main implementation language.
-- **gRPC:** Client/server remote procedure calls.
-- **Protocol Buffers:** Service and message definitions.
-- **WAL:** Write-ahead logging for storage recovery.
-- **Memtable and SSTable:** In-memory and on-disk storage components.
-- **Go testing tools:** Unit and integration tests.
-- **Linux performance tools:** `perf` and `bpftrace` for profiling, where supported.
-- **Planned operations tools:** Kubernetes, Helm, Prometheus, Grafana, and fault-injection tooling.
+### Week 3: Write-Ahead Log (WAL)
+Implemented the WAL to record storage operations before applying them. This provides a foundation for recovering storage state after an unexpected shutdown.
 
-## 6. Development Roadmap — Weeks 1 to 12
+### Week 4: Memtable Implementation
+Developed the Memtable to maintain recent key-value updates in memory. Implemented basic data insertion and retrieval operations for efficient access.
 
-| Weeks | Focus | Main activities / evidence |
-|---|---|---|
-| 1–2 | Foundation | Lock topic, create repository and Go scaffold, establish Linux profiling baseline |
-| 3–4 | Storage engine | Implement WAL, memtable, SSTables, recovery and compaction; plan a fair RocksDB comparison |
-| 5–6 | Concurrency | Build concurrent structures, run race detection, benchmark several worker counts |
-| 7–8 | Service layer | Build gRPC service/client, routing, request IDs and retry behavior |
-| 9–10 | Consensus | Implement Raft-related election, replication and commit handling; add safety tests |
-| 11–12 | Operations | Prepare Kubernetes/Helm deployment, Prometheus/Grafana dashboards and Jepsen-style fault testing |
+### Week 5: SSTable Implementation
+Developed SSTable components to store data in sorted, persistent files. Added supporting storage functionality and tests.
 
-This table describes the full project roadmap. It is not a claim that every milestone or deliverable is complete.
+### Week 6: Storage Integration and Recovery
+Integrated the storage components and worked on compaction and recovery behavior. Tested persistent data handling, including tombstone recovery, to improve storage correctness.
 
-## 7. Storage Engine Overview
+### Week 7: gRPC Communication
+Defined service interfaces using Protocol Buffers and implemented gRPC-based communication. Established the foundation for clients and servers to exchange requests and responses.
 
-### Write-Ahead Log (WAL)
-A write is recorded in the log so that it can be replayed during recovery. WAL recovery behavior should be validated with restart and failure tests.
+### Week 8: Client-Server Operations
+Integrated client requests with the storage service and tested GET and PUT operations. Verified request handling, retries, and retrieval of stored key-value pairs.
 
-### Memtable
-Recent key/value updates are held in memory for fast access before being flushed to disk.
+### Week 9: Raft Leader Election
+Implemented core Raft election functionality, including voting, terms, and leader selection. Tested the election process to verify successful leader election.
 
-### SSTable
-The memtable can be flushed into sorted, immutable files called SSTables. Indexing helps locate entries.
+### Week 10: Raft Log Replication
+Worked on replicating log entries between nodes and integrating Raft with the gRPC service. Tested follower replication to validate distributed request handling.
 
-### Compaction
-Compaction merges storage files and can remove obsolete versions and tombstones when it is safe to do so.
+### Week 11: Testing and Validation
+Executed functional, integration, storage, and concurrency tests. Used Go's testing framework and race detector to identify correctness issues and check concurrent data access.
 
-### Simplified write flow
+### Week 12: Documentation and Final Evaluation
+Organized project documentation, recorded test evidence, and identified remaining work. Planned performance benchmarking, fault-injection testing, deployment, and monitoring as further enhancements.
 
-```text
-PUT request
-    |
-    v
-Record write in WAL
-    |
-    v
-Update Memtable
-    |
-    v
-Flush sorted data to SSTable
-    |
-    v
-Compact files when needed
-```
+> **Progress note:** The roadmap summarizes the intended development sequence. Activities should be marked completed only when supported by implementation, test results, or other project evidence.
 
-The precise ordering and durability guarantees should be confirmed against the current implementation and tests.
+## 6. Key Features
 
-## 8. gRPC and Client Example
+- Persistent key-value storage using WAL, Memtable, and SSTables.
+- Modular storage and communication components.
+- GET and PUT operations.
+- gRPC-based client-server communication.
+- Raft leader election and log replication functionality.
+- Storage recovery and tombstone handling tests.
+- Automated functional and integration testing.
+- Concurrency checking using Go's race detector.
 
-A simple key/value example:
+## 7. Implementation and Execution
 
-```text
-Key   = product
-Value = laptop
-```
-
-A client can send a `PUT` request to store the pair and a `GET` request to retrieve it. Request IDs can help identify retries, but retry safety depends on the server's deduplication behavior and the operation semantics.
-
-Example demonstration sequence:
-
-1. Start the server or the required set of nodes.
-2. Run the client.
-3. Send a `PUT` request for `product = laptop`.
-4. Retry the request with the same request ID, if supported by the demo.
-5. Send a `GET` request and inspect the returned value.
-
-Use the commands and configuration from the current source tree when running the demo; exact options can change as the project evolves.
-
-## 9. Raft Concepts
-
-Raft is a consensus algorithm used to coordinate a replicated log.
-
-- **Leader election:** Nodes vote for a candidate; a majority is needed to elect a leader for a term.
-- **Log replication:** The leader sends log entries to followers.
-- **Commit handling:** Entries are committed according to Raft rules and then applied to the state machine.
-- **Safety testing:** Tests should check voting rules, terms, replication, commit decisions, and behavior when nodes or network connections fail.
-
-A successful leader-election test alone does not establish that all fault-tolerance or production requirements are met.
-
-## 10. Build and Test
-
-Run these commands from the repository root, where `go.mod` is located.
-
-### Check Go installation
-
-```bash
-go version
-```
-
-### Build all packages
-
-```bash
-go build ./...
-```
-
-### Run all tests
+### Run the Test Suite
 
 ```bash
 go test -count=1 ./...
 ```
 
-### Run the race detector
+### Run Race Detection
 
 ```bash
 go test -race ./...
 ```
 
-The race detector may increase runtime and memory use. If a command fails, retain the complete error output and the Go version to help reproduce the issue.
+### Start the Server
 
-## 11. Verified Test Evidence
+From the project root, run:
 
-During the development workflow, the following results were observed:
+```bash
+go run ./cmd/server
+```
 
-- `go test -count=1 ./...` passed on a teammate's cloned repository for the listed gRPC, Raft, and storage packages.
-- A client demonstration reported a successful `PUT`, a successful retry, and a `GET` returning `product = laptop`.
-- A separate Raft election client reported `elected=true` and `state=Leader`.
+The server uses the project's configured defaults and environment variables for node identity, port, data directory, and Raft peers.
 
-These are specific development results, not a claim of production readiness. Add dates, environment details, terminal screenshots, and test output to the final report when available.
+## 8. Testing and Verification
 
-## 12. Performance Evaluation Plan
+The following results have been reported from project testing:
 
-For a fair performance report, record:
+- The complete Go test suite passed in the tested environment.
+- Earlier race-detector testing completed successfully.
+- Raft election testing verified successful leader election.
+- A gRPC integration test verified PUT replication to a follower.
+- Client testing verified PUT, retry, and GET operations.
+- Storage tests covered persistence and tombstone recovery.
 
-- CPU, RAM, operating system/kernel, Go version, storage device, node count, and configuration.
-- Workload type: read-heavy, write-heavy, or mixed.
-- Number of operations, key/value sizes, concurrency level, warm-up, and measurement duration.
-- **Throughput:** operations per second.
-- **Latency:** p50, p95, and p99 where measured.
-- CPU/memory use, errors, and recovery time where relevant.
+These results provide evidence of core functionality. They do not, by themselves, establish production-level fault tolerance or performance.
 
-Repeat runs and report the method and variation. Compare against RocksDB, etcd, or TiKV only when the workloads, environment, and semantics are reasonably comparable. Do not insert benchmark numbers until they have actually been measured.
+## 9. Current Limitations
 
-## 13. Deployment and Observability Roadmap
+- Durable persistence of Raft metadata requires further work.
+- Automatic election timeout and re-election behavior need additional validation.
+- Follower catch-up after reconnection requires improvement.
+- Large-scale throughput and latency benchmarking remain to be completed.
+- Fault-injection and extended distributed consistency testing remain future work.
+- Kubernetes deployment, Helm configuration, and Prometheus/Grafana monitoring require completion and verification if not already implemented.
 
-The full project brief calls for the following deliverables:
+## 10. Future Enhancements
 
-- **Kubernetes:** Run the service in a multi-node or multi-replica deployment.
-- **Helm:** Package deployment resources and configuration.
-- **Prometheus:** Collect service and system metrics.
-- **Grafana:** Provide importable dashboards for health, request rate, latency, errors, and resource usage.
-- **Jepsen-style harness:** Inject node or network failures, record operation histories, and check consistency properties.
-- **Live demo:** Demonstrate the deployment and explain the tested fault scenarios.
+- Strengthen Raft recovery and re-election mechanisms.
+- Improve replication and follower catch-up after failures.
+- Benchmark throughput, latency, and resource utilization under different workloads.
+- Integrate Kubernetes-based deployment and monitoring.
+- Conduct fault-injection and Jepsen-style consistency testing.
+- Improve operational observability and distributed-system reliability.
 
-Treat these as pending until the relevant artifacts and results are present in the repository.
+## 11. Conclusion
 
-## 14. Known Limitations and Next Steps
+ResilientKV demonstrates the design and implementation of a distributed key-value storage system using Go, persistent storage structures, gRPC, and Raft consensus. The project brings together storage-engine design, inter-node communication, distributed coordination, and automated testing.
 
-This is an educational implementation and should not be described as production-ready without further engineering and validation. Areas requiring careful review include:
-
-- Durable Raft term/vote metadata and complete crash recovery.
-- Automatic election timeouts and re-election behavior.
-- Follower catch-up after disconnection and restart.
-- Broader safety testing under delays, partitions, and node failures.
-- Reproducible comparisons with established storage/distributed systems.
-- Completed Kubernetes/Helm deployment, dashboards, and fault-injection evidence.
-
-Recommended next steps are to close these gaps, document the behavior that is actually guaranteed, and retain reproducible test and benchmark evidence.
-
-## 15. Final Deliverables Checklist
-
-- [x] Source code hosted in GitHub.
-- [x] Storage components including WAL, memtable, SSTable and compaction code.
-- [x] gRPC service/client components.
-- [x] Raft-related election, replication and commit-handling code.
-- [x] Go test suite passes in the recorded development workflow.
-- [ ] Separate LSM-tree library packaging, if required by the course.
-- [ ] Full Raft safety and failure-recovery test report.
-- [ ] RocksDB / etcd / TiKV comparative benchmark report.
-- [ ] Kubernetes deployment and Helm chart.
-- [ ] Prometheus metrics and importable Grafana dashboard JSON.
-- [ ] Jepsen-style fault-injection harness and documented results.
-- [ ] Architecture document (10–15 pages, ADR-style).
-- [ ] Live multi-node Kubernetes demo.
-
-> Update the checklist as each item is completed and verified. The checked items reflect the implementation and test evidence currently recorded in this README.
-
-## 16. Conclusion
-
-ResilientKV is a learning project that brings together storage-engine concepts, service communication, distributed coordination, testing, and operations. It provides a foundation for understanding how distributed key–value systems are designed and evaluated.
-
-The project should be presented with reproducible evidence: show the source code, run the tests, demonstrate the client, explain the design, and clearly distinguish verified functionality from remaining work.
+The implementation provides a foundation for further research and development in fault-tolerant storage systems, with additional work needed to strengthen recovery, large-scale performance, and production readiness.
 
 ---
 
-**Repository:** https://github.com/chennamsivanagayaswanthi-dotcom/ResilientKV
