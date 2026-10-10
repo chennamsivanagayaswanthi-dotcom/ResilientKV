@@ -1,0 +1,7 @@
+=== BEFORE RESTART ===
+Sat Oct 10 15:12:13 UTC 2026
+2026/10/10 15:12:13 GET: key=product value=laptop found=true
+
+=== AFTER RESTART ===
+Sat Oct 10 15:16:14 UTC 2026
+2026/10/10 15:16:15 GET: key=product value=laptop found=true
